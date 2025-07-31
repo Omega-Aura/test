@@ -31,6 +31,10 @@ const songSchema = new mongoose.Schema(
 			type: String,
 			required: false,
 		},
+		hasLRC: {
+			type: Boolean,
+			default: false,
+		},
 		language: {
 			type: String,
 			required: false,

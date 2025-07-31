@@ -18,10 +18,12 @@ interface PlayerStore {
 	volume: number;
 	isMuted: boolean;
 	previousVolume: number;
+	currentTime: number;
 
 	initializeQueue: (songs: Song[]) => void;
 	playAlbum: (songs: Song[], startIndex?: number) => void;
 	setCurrentSong: (song: Song | null) => void;
+	setCurrentTime: (time: number) => void;
 	togglePlay: () => void;
 	playNext: () => void;
 	playPrevious: () => void;
@@ -54,6 +56,7 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
 	volume: 75,
 	isMuted: false,
 	previousVolume: 75,
+	currentTime: 0,
 
 	initializeQueue: (songs: Song[]) => {
 		set({
@@ -106,6 +109,8 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
 			console.log('Song has no _id, cannot add to recent');
 		}
 	},
+
+	setCurrentTime: (time) => set({ currentTime: time }),
 
 	togglePlay: () => {
 		const willStartPlaying = !get().isPlaying;
@@ -162,7 +167,7 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
 		// Play the next song
 		if (nextIndex < queue.length) {
 			const nextSong = queue[nextIndex];
-			
+
 			set({ currentIndex: nextIndex });
 			get().setCurrentSong(nextSong);
 		}
@@ -174,7 +179,7 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
 		// theres a prev song
 		if (prevIndex >= 0) {
 			const prevSong = queue[prevIndex];
-			
+
 			set({ currentIndex: prevIndex });
 			get().setCurrentSong(prevSong);
 		} else {
@@ -208,7 +213,7 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
 				isMuted: settings.volume === 0,
 				previousVolume: settings.volume > 0 ? settings.volume : 75
 			});
-			
+
 			// Apply volume to audio element if it exists
 			const audio = document.querySelector("audio") as HTMLAudioElement;
 			if (audio) {
@@ -247,14 +252,14 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
 		try {
 			// Update volume in backend
 			await playerService.setVolume(newVolume);
-			
+
 			// Update local state
-			set({ 
-				volume: newVolume, 
+			set({
+				volume: newVolume,
 				isMuted: newVolume === 0,
 				previousVolume: newVolume > 0 ? newVolume : get().previousVolume
 			});
-			
+
 			// Apply volume to audio element if it exists
 			const audio = document.querySelector("audio") as HTMLAudioElement;
 			if (audio) {
@@ -268,19 +273,19 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
 
 	toggleMute: () => {
 		const { volume, isMuted, previousVolume } = get();
-		
+
 		if (isMuted) {
 			// Unmute: restore previous volume
 			const restoreVolume = previousVolume > 0 ? previousVolume : 75;
 			get().setVolume(restoreVolume);
 		} else {
 			// Mute: set volume to 0 but remember current volume
-			set({ 
+			set({
 				previousVolume: volume > 0 ? volume : previousVolume,
 				volume: 0,
 				isMuted: true
 			});
-			
+
 			// Apply mute to audio element if it exists
 			const audio = document.querySelector("audio") as HTMLAudioElement;
 			if (audio) {
@@ -311,7 +316,7 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
 
 		const newQueue = [...queue];
 		newQueue.splice(index, 1);
-		
+
 		let newCurrentIndex = currentIndex;
 		if (index < currentIndex) {
 			newCurrentIndex = currentIndex - 1;
@@ -320,8 +325,8 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
 			newCurrentIndex = Math.min(currentIndex, newQueue.length - 1);
 		}
 
-		set({ 
-			queue: newQueue, 
+		set({
+			queue: newQueue,
 			currentIndex: newCurrentIndex,
 			currentSong: newQueue[newCurrentIndex] || null
 		});
@@ -345,25 +350,25 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
 			newCurrentIndex = currentIndex + 1;
 		}
 
-		set({ 
-			queue: newQueue, 
-			currentIndex: newCurrentIndex 
+		set({
+			queue: newQueue,
+			currentIndex: newCurrentIndex
 		});
 	},
 
 	clearQueue: () => {
-		set({ 
-			queue: [], 
-			currentIndex: -1, 
-			currentSong: null, 
-			isPlaying: false 
+		set({
+			queue: [],
+			currentIndex: -1,
+			currentSong: null,
+			isPlaying: false
 		});
 	},
 
 	toggleRecent: () => {
 		const { showRecent } = get();
 		set({ showRecent: !showRecent });
-		
+
 		// Load recent songs when opening recent panel
 		if (!showRecent) {
 			get().loadRecentSongs();

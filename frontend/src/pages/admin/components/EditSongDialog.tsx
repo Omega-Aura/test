@@ -16,6 +16,7 @@ import { Edit, Upload } from "lucide-react";
 import { useRef, useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { Song } from "@/types";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface EditSong {
 	title: string;
@@ -23,6 +24,7 @@ interface EditSong {
 	album: string;
 	duration: string;
 	lyrics: string;
+	hasLRC: boolean;
 	language: string;
 	releaseDate: string;
 }
@@ -42,6 +44,7 @@ const EditSongDialog = ({ song }: EditSongDialogProps) => {
 		album: "",
 		duration: "0",
 		lyrics: "",
+		hasLRC: false,
 		language: "English",
 		releaseDate: new Date().toISOString().split('T')[0],
 	});
@@ -63,6 +66,7 @@ const EditSongDialog = ({ song }: EditSongDialogProps) => {
 				album: song.albumId || "",
 				duration: song.duration.toString(),
 				lyrics: song.lyrics || "",
+				hasLRC: song.hasLRC || false,
 				language: song.language || "English",
 				releaseDate: song.releaseDate ? new Date(song.releaseDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
 			});
@@ -80,6 +84,7 @@ const EditSongDialog = ({ song }: EditSongDialogProps) => {
 			formData.append("duration", editSong.duration);
 			formData.append("language", editSong.language);
 			formData.append("releaseDate", editSong.releaseDate);
+			formData.append("hasLRC", String(editSong.hasLRC));
 			if (editSong.lyrics.trim()) {
 				formData.append("lyrics", editSong.lyrics);
 			}
@@ -106,10 +111,10 @@ const EditSongDialog = ({ song }: EditSongDialogProps) => {
 				audio: null,
 				image: null,
 			});
-			
+
 			setSongDialogOpen(false);
 			toast.success("Song updated successfully");
-			
+
 			// Refresh the songs list
 			if (updateSong) {
 				updateSong();
@@ -240,6 +245,21 @@ const EditSongDialog = ({ song }: EditSongDialogProps) => {
 							className='flex min-h-[120px] w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder:text-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50'
 							placeholder='Enter song lyrics here...'
 						/>
+					</div>
+
+					<div className='flex items-center space-x-2'>
+						<Checkbox
+							id='hasLRCEdit'
+							checked={editSong.hasLRC}
+							onCheckedChange={(checked: boolean) => setEditSong({ ...editSong, hasLRC: !!checked })}
+							className='border-zinc-700 data-[state=checked]:bg-blue-500'
+						/>
+						<label
+							htmlFor='hasLRCEdit'
+							className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
+						>
+							Lyrics are in LRC format
+						</label>
 					</div>
 
 					<div className='space-y-2'>

@@ -8,6 +8,7 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { axiosInstance } from "@/lib/axios";
@@ -22,6 +23,7 @@ interface NewSong {
 	album: string;
 	duration: string;
 	lyrics: string;
+	hasLRC: boolean;
 	language: string;
 	releaseDate: string;
 }
@@ -37,6 +39,7 @@ const AddSongDialog = () => {
 		album: "",
 		duration: "0",
 		lyrics: "",
+		hasLRC: false,
 		language: "English",
 		releaseDate: new Date().toISOString().split('T')[0], // Default to today's date
 	});
@@ -64,6 +67,7 @@ const AddSongDialog = () => {
 			formData.append("duration", newSong.duration);
 			formData.append("language", newSong.language);
 			formData.append("releaseDate", newSong.releaseDate);
+			formData.append("hasLRC", String(newSong.hasLRC));
 			if (newSong.lyrics.trim()) {
 				formData.append("lyrics", newSong.lyrics);
 			}
@@ -86,6 +90,7 @@ const AddSongDialog = () => {
 				album: "",
 				duration: "0",
 				lyrics: "",
+				hasLRC: false,
 				language: "English",
 				releaseDate: new Date().toISOString().split('T')[0],
 			});
@@ -217,6 +222,20 @@ const AddSongDialog = () => {
 							className='flex min-h-[120px] w-full rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder:text-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50'
 							placeholder='Enter song lyrics here...'
 						/>
+					</div>
+					<div className='flex items-center space-x-2'>
+						<Checkbox
+							id='hasLRC'
+							checked={newSong.hasLRC}
+							onCheckedChange={(checked: boolean) => setNewSong({ ...newSong, hasLRC: !!checked })}
+							className='border-zinc-700 data-[state=checked]:bg-emerald-500'
+						/>
+						<label
+							htmlFor='hasLRC'
+							className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
+						>
+							Lyrics are in LRC format
+						</label>
 					</div>
 
 					<div className='space-y-2'>

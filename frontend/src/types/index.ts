@@ -7,6 +7,7 @@ export interface Song {
 	audioUrl: string;
 	duration: number;
 	lyrics?: string;
+	hasLRC?: boolean;
 	language?: string;
 	releaseDate?: string;
 	createdAt: string;

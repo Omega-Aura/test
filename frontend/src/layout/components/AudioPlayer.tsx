@@ -5,7 +5,7 @@ const AudioPlayer = () => {
 	const audioRef = useRef<HTMLAudioElement>(null);
 	const prevSongRef = useRef<string | null>(null);
 
-	const { currentSong, isPlaying, playNext } = usePlayerStore();
+	const { currentSong, isPlaying, playNext, setCurrentTime } = usePlayerStore();
 
 	// handle play/pause logic
 	useEffect(() => {
@@ -25,6 +25,21 @@ const AudioPlayer = () => {
 
 		return () => audio?.removeEventListener("ended", handleEnded);
 	}, [playNext]);
+
+	// handle time updates
+	useEffect(() => {
+		const audio = audioRef.current;
+
+		const handleTimeUpdate = () => {
+			if (audio) {
+				setCurrentTime(audio.currentTime);
+			}
+		};
+
+		audio?.addEventListener("timeupdate", handleTimeUpdate);
+
+		return () => audio?.removeEventListener("timeupdate", handleTimeUpdate);
+	}, [setCurrentTime]);
 
 	// handle song changes
 	useEffect(() => {

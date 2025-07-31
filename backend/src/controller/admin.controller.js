@@ -21,7 +21,7 @@ export const createSong = async (req, res, next) => {
 			return res.status(400).json({ message: "Please upload all files" });
 		}
 
-		const { title, artist, albumId, duration, lyrics, language, releaseDate } = req.body;
+		const { title, artist, albumId, duration, lyrics, language, releaseDate, hasLRC } = req.body;
 		const audioFile = req.files.audioFile;
 		const imageFile = req.files.imageFile;
 
@@ -36,6 +36,7 @@ export const createSong = async (req, res, next) => {
 			duration,
 			albumId: albumId || null,
 			lyrics: lyrics || null,
+			hasLRC: hasLRC === "true",
 			language: language || "English",
 			releaseDate: releaseDate ? new Date(releaseDate) : new Date(),
 		});
@@ -80,9 +81,9 @@ export const deleteSong = async (req, res, next) => {
 export const updateSong = async (req, res, next) => {
 	try {
 		const { id } = req.params;
-		const { title, artist, albumId, duration, lyrics, language, releaseDate } = req.body;
+		const { title, artist, albumId, duration, lyrics, language, releaseDate, hasLRC } = req.body;
 
-		console.log("Updating song with data:", { title, artist, albumId, duration, lyrics, language, releaseDate });
+		console.log("Updating song with data:", { title, artist, albumId, duration, lyrics, language, releaseDate, hasLRC });
 
 		const song = await Song.findById(id);
 		if (!song) {
@@ -94,6 +95,7 @@ export const updateSong = async (req, res, next) => {
 		song.artist = artist || song.artist;
 		song.duration = duration || song.duration;
 		song.lyrics = lyrics !== undefined ? lyrics : song.lyrics;
+		song.hasLRC = hasLRC !== undefined ? hasLRC === 'true' : song.hasLRC;
 		song.language = language || song.language;
 		if (releaseDate !== undefined) {
 			song.releaseDate = releaseDate ? new Date(releaseDate) : new Date();
@@ -133,10 +135,10 @@ export const updateSong = async (req, res, next) => {
 
 		await song.save();
 
-		console.log("Song updated successfully:", { 
-			id: song._id, 
-			title: song.title, 
-			releaseDate: song.releaseDate 
+		console.log("Song updated successfully:", {
+			id: song._id,
+			title: song.title,
+			releaseDate: song.releaseDate
 		});
 
 		res.status(200).json(song);
